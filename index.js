@@ -1,9 +1,11 @@
 const express = require('express');
 const morgan = require('morgan');
 const app = express();
-const methodOverride = require('method-override')
+const methodOverride = require('method-override');
+const swaggerUI = require("swagger-ui-express");
+const swaggerJsDoc = require("swagger-jsdoc");
 const db=require('./src/DB/connect');
-const port = 3000;
+const port = 8732;
 db.connect();
 const loginController=require('./src/Controller/LoginController');
 const categoryController=require('./src/Controller/CategoryController');
@@ -15,7 +17,24 @@ app.use(express.json());
 app.use((req,res)=>{
   checkKey.ckeck(req,res);
 });
-
+const options = {
+	definition: {
+		openapi: "3.0.0",
+		info: {
+			title: "Library API",
+			version: "1.0.0",
+			description: "A simple Express Library API",
+		},
+		servers: [
+			{
+				url: "http://localhost:8732",
+			},
+		],
+	},
+	apis: ["./Controller/*.js"],
+};
+const specs = swaggerJsDoc(options);
+app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(specs));
 app.get('/api/Login',async(req,res)=>{
  await loginController.index(req,res);
  
